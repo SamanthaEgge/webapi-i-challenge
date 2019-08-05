@@ -16,7 +16,7 @@ server.get('/api/users', (request, response) => {
     })
 })
 
-server.get("/api/users/:id", async (request, response) => {
+server.get("/api/users/:id", (request, response) => {
   const id = request.params.id;
   db.findById(id)
     .then(user => {
@@ -31,7 +31,7 @@ server.get("/api/users/:id", async (request, response) => {
     })
 });
 
-server.post("/api/users", async (request, response) => {
+server.post("/api/users", (request, response) => {
   const { name, bio } = request.body;
 
   if (!name || !bio) {
@@ -46,14 +46,29 @@ server.post("/api/users", async (request, response) => {
       .catch(error => {
         response.status(500).json({ message: 'error creating new user'})
       })
-    // try {
-    //   const user = await db.insert(request.body);
-    //   response.status(201).json(user);
-    // } catch (err) {
-    //   response.status(500).json({
-    //     error: "There was an error while saving the user to the database."
-    //   });
-    // }
+  }
+});
+
+server.put("/api/users/:id", (request, response) => {
+  const { name, bio } = request.body;
+  const id = request.params.id;
+
+  if (!name || !bio) {
+    response.status(400).send({
+      errorMessage: "Please provide name and bio for the user."
+    });
+  } else {
+    db.update(id, request.body)
+      .then(user => {
+        if (user) {
+          response.status(200).json(user)
+        } else {
+          response.status(404).json({ message: 'user not found' })
+        } 
+      })
+      .catch(error => {
+        response.status(500).json({ message: 'error creating new user'})
+      })
   }
 });
 
